@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tailwind CSS & TypeScript</title>
+    <link rel="stylesheet" href="./output.css">
+    <script defer src="../index.js"></script>
+</head>
+<body>
+    <header></header>
+    <main>
+        <div class="container mx-auto my-8">
+            <h1 class="text-3xl font-bold mb-4">Task Manager</h1>
+            <div>
+                <input type="text" id="taskInput" class="border p-2 mr-2" placeholder="Enter a new task">
+                <button onclick="addTask()" class="bg-blue-500 text-white px-4 py-2">Add Task</button>
+            </div>
+            <ul id="taskList" class="mt-4">
+            </ul>
+        </div>
+    </main>
+    <footer></footer>
+</body>
+</html>
