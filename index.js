@@ -1,57 +1,47 @@
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
+var list = document.querySelector('#taskList');
+var button = document.querySelector('#addButton');
+var input = document.querySelector('#taskInput');
+var tasks = loadTasks();
+tasks.forEach(addListItem);
+button === null || button === void 0 ? void 0 : button.addEventListener('click', function () {
+    if (input.value === '')
+        return;
+    var newTask = {
+        id: tasks.length + 1,
+        title: input.value,
+        completed: false,
+        createdAt: new Date(),
     };
-    return __assign.apply(this, arguments);
-};
-// Define a Task class to represent each task
-var Task = /** @class */ (function () {
-    function Task(id, text, completed) {
-        this.id = id;
-        this.text = text;
-        this.completed = completed;
-    }
-    return Task;
-}());
-// Array to store tasks
-var tasks = [];
-// Function to add a new task
-function addTask() {
-    var inputElement = document.getElementById('taskInput');
-    var taskText = inputElement.value.trim();
-    if (taskText !== '') {
-        var newTask = new Task(tasks.length + 1, taskText, false);
-        tasks.push(newTask);
-        inputElement.value = ''; // Clear the input field
-        renderTasks();
-    }
+    tasks.push(newTask);
+    addListItem(newTask);
+    input.value = '';
+    saveTasks();
+});
+function addListItem(task) {
+    var item = document.createElement('li');
+    var label = document.createElement('label');
+    var checkbox = document.createElement('input');
+    checkbox.addEventListener('change', function () {
+        task.completed = checkbox.checked;
+        label.classList.toggle('completed', task.completed);
+        saveTasks();
+    });
+    checkbox.type = 'checkbox';
+    checkbox.checked = task.completed;
+    checkbox.classList.add('mr-3', 'bg-blue-500', 'text-white', 'rounded');
+    label.classList.add('cursor-pointer', 'text-2xl');
+    label.classList.toggle('line-through', task.completed);
+    label.append(checkbox, task.title);
+    item.append(label);
+    list === null || list === void 0 ? void 0 : list.append(item);
 }
-// Function to toggle the completion status of a task
-function toggleTaskStatus(id) {
-    tasks = tasks.map(function (task) { return (task.id === id ? __assign(__assign({}, task), { completed: !task.completed }) : task); });
-    renderTasks();
+function saveTasks() {
+    var incompleteTasks = tasks.filter(function (task) { return !task.completed; });
+    localStorage.setItem('TASKS', JSON.stringify(incompleteTasks));
 }
-// Function to remove a task
-function removeTask(id) {
-    tasks = tasks.filter(function (task) { return task.id !== id; });
-    renderTasks();
+function loadTasks() {
+    var taskJSON = localStorage.getItem('TASKS');
+    if (taskJSON == null)
+        return [];
+    return JSON.parse(taskJSON);
 }
-// Function to render the list of tasks
-function renderTasks() {
-    var taskListElement = document.getElementById('taskList');
-    if (taskListElement) {
-        taskListElement.innerHTML = ''; // Clear the existing list
-        tasks.forEach(function (task) {
-            var listItem = document.createElement('li');
-            listItem.innerHTML = "\n                <input type=\"checkbox\" ".concat(task.completed ? 'checked' : '', " onchange=\"toggleTaskStatus(").concat(task.id, ")\">\n                <span class=\"").concat(task.completed ? 'line-through' : '', "\">").concat(task.text, "</span>\n                <button onclick=\"removeTask(").concat(task.id, ")\" class=\"ml-4 bg-red-500 text-white px-2 py-1\">Remove</button>\n            ");
-            taskListElement.appendChild(listItem);
-        });
-    }
-}
-// Initial rendering of tasks
-renderTasks();

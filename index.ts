@@ -1,49 +1,66 @@
-class Task {
-    constructor(public id: number, public text: string, public completed: boolean) {}
+type Task = {
+    id: number;
+    title: string;
+    completed: boolean;
+    createdAt: Date;
+  };
+  
+  const list = document.querySelector<HTMLUListElement>('#taskList')!;
+  const button = document.querySelector<HTMLButtonElement>('#addButton')!;
+  const input = document.querySelector<HTMLInputElement>('#taskInput')!;
+  
+  const tasks: Task[] = loadTasks();
+  
+  tasks.forEach(addListItem);
+  
+  button?.addEventListener('click', () => {
+    if (input.value === '') return;
+  
+    const newTask: Task = {
+      id: tasks.length + 1,
+      title: input.value,
+      completed: false,
+      createdAt: new Date(),
+    };
+  
+    tasks.push(newTask);
+    addListItem(newTask);
+    input.value = '';
+    saveTasks();
+  });
+  
+  function addListItem(task: Task) {
+    const item = document.createElement('li');
+    const label = document.createElement('label');
+    const checkbox = document.createElement('input');
+
+    checkbox.addEventListener('change', () => {
+        task.completed = checkbox.checked;
+        label.classList.toggle('completed', task.completed);
+        saveTasks();
+    });
+
+    checkbox.type = 'checkbox';
+    checkbox.checked = task.completed;
+    
+    checkbox.classList.add('mr-3', 'bg-blue-500', 'text-white', 'rounded'); 
+    label.classList.add('cursor-pointer', 'text-2xl');
+
+    label.classList.toggle('line-through', task.completed);
+
+    label.append(checkbox, task.title);
+    item.append(label);
+    list?.append(item);
 }
-
-let tasks: Task[] = [];
-
-// Function to add a new task
-function addTask() {
-    const inputElement = document.getElementById('taskInput') as HTMLInputElement;
-    const taskText = inputElement.value.trim();
-
-    if (taskText !== '') {
-        const newTask = new Task(tasks.length + 1, taskText, false);
-        tasks.push(newTask);
-        inputElement.value = '';
-        renderTasks();
-    }
-}
-
-// Function to toggle the completion status of a task
-function toggleTaskStatus(id: number) {
-    tasks = tasks.map(task => (task.id === id ? { ...task, completed: !task.completed } : task));
-    renderTasks();
-}
-
-// Function to remove a task
-function removeTask(id: number) {
-    tasks = tasks.filter(task => task.id !== id);
-    renderTasks();
-}
-
-function renderTasks() {
-    const taskListElement = document.getElementById('taskList');
-    if (taskListElement) {
-        taskListElement.innerHTML = ''; 
-
-        tasks.forEach(task => {
-            const listItem = document.createElement('li');
-            listItem.innerHTML = `
-                <input type="checkbox" class="mr-2" ${task.completed ? 'checked' : ''} onchange="toggleTaskStatus(${task.id})">
-                <span class="${task.completed ? 'line-through' : ''}">${task.text}</span>
-                <button onclick="removeTask(${task.id})" class="ml-4 bg-red-500 text-white px-2 py-1">Remove</button>
-            `;
-            taskListElement.appendChild(listItem);
-        });
-    }
-}
-
-renderTasks();
+  
+  function saveTasks() {
+    const incompleteTasks = tasks.filter(task => !task.completed);
+    localStorage.setItem('TASKS', JSON.stringify(incompleteTasks));
+  }
+  
+  function loadTasks(): Task[] {
+    const taskJSON = localStorage.getItem('TASKS');
+    if (taskJSON == null) return [];
+    return JSON.parse(taskJSON);
+  }
+  
